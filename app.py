@@ -19,10 +19,10 @@ class UsageApp(rumps.App):
 
         self.claude_item = rumps.MenuItem("Claude Pro   loading…", callback=lambda _: show_dashboard(0))
         self.cursor_item = rumps.MenuItem("Cursor Pro   loading…", callback=lambda _: show_dashboard(1))
-        self.codex_item  = rumps.MenuItem("Codex        loading…", callback=lambda _: show_dashboard(2))
+        self.codex_item  = rumps.MenuItem("Codex (ChatGPT Pro)   loading…", callback=lambda _: show_dashboard(2))
         self.updated_item = rumps.MenuItem("Updated: —", callback=None)
         self.refresh_item = rumps.MenuItem("↻  Refresh", callback=self.refresh)
-        self.dashboards_item = rumps.MenuItem("↗  Usage Dashboards", callback=lambda _: show_dashboard(0))
+        self.dashboards_item = rumps.MenuItem("↗  Open Link", callback=lambda _: show_dashboard(0))
 
         self.menu = [
             self.claude_item,
@@ -128,7 +128,7 @@ class UsageApp(rumps.App):
 
     @staticmethod
     def _fmt_codex(d):
-        label = "Codex        "
+        label = "Codex (ChatGPT Pro)   "
         if not d.get("connected"):
             err = d.get("error", "not connected")
             return label + f"✗  {err}"
