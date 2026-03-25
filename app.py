@@ -17,12 +17,11 @@ class UsageApp(rumps.App):
     def __init__(self):
         super().__init__("📊", quit_button="Quit")
 
-        self.claude_item = rumps.MenuItem("Claude Pro   loading…", callback=lambda _: show_dashboard(0))
-        self.cursor_item = rumps.MenuItem("Cursor Pro   loading…", callback=lambda _: show_dashboard(1))
-        self.codex_item  = rumps.MenuItem("Codex (ChatGPT Pro)   loading…", callback=lambda _: show_dashboard(2))
+        self.claude_item = rumps.MenuItem("↗  Claude Pro   loading…", callback=lambda _: show_dashboard(0))
+        self.cursor_item = rumps.MenuItem("↗  Cursor Pro   loading…", callback=lambda _: show_dashboard(1))
+        self.codex_item  = rumps.MenuItem("↗  Codex (ChatGPT Pro)   loading…", callback=lambda _: show_dashboard(2))
         self.updated_item = rumps.MenuItem("Updated: —", callback=None)
         self.refresh_item = rumps.MenuItem("↻  Refresh", callback=self.refresh)
-        self.dashboards_item = rumps.MenuItem("↗  Open Link", callback=lambda _: show_dashboard(0))
 
         self.menu = [
             self.claude_item,
@@ -31,7 +30,6 @@ class UsageApp(rumps.App):
             None,
             self.updated_item,
             self.refresh_item,
-            self.dashboards_item,
         ]
 
         # Initial fetch
@@ -90,23 +88,16 @@ class UsageApp(rumps.App):
 
     @staticmethod
     def _fmt_claude(d):
-        label = "Claude Pro   "
+        label = "↗  Claude Pro   "
         if not d.get("connected"):
-            err = d.get("error", "not connected")
-            return label + f"✗  {err}"
-        note = d.get("note")
-        if d.get("verified"):
-            return label + "✓  API key active"
-        if note:
-            return label + f"✓  {note}"
-        return label + "✓  subscribed"
+            return label + "✗  not connected"
+        return label + "✓"
 
     @staticmethod
     def _fmt_cursor(d):
-        label = "Cursor Pro   "
+        label = "↗  Cursor Pro   "
         if not d.get("connected"):
-            err = d.get("error", "not connected")
-            return label + f"✗  {err}"
+            return label + "✗  not connected"
         used  = d.get("requests_used")
         limit = d.get("requests_limit")
         if used is not None and limit:
@@ -120,28 +111,21 @@ class UsageApp(rumps.App):
             bar = _progress_bar(pct)
             return label + f"{bar}  ${credits_used:.2f}/${credits_limit:.2f}"
         if used is not None:
-            return label + f"✓  {used} requests used"
-        note = d.get("note")
-        if note:
-            return label + f"✓  {note}"
-        return label + "✓  subscribed"
+            return label + f"✓  {used} requests"
+        return label + "✓"
 
     @staticmethod
     def _fmt_codex(d):
-        label = "Codex (ChatGPT Pro)   "
+        label = "↗  Codex (ChatGPT Pro)   "
         if not d.get("connected"):
-            err = d.get("error", "not connected")
-            return label + f"✗  {err}"
+            return label + "✗  not connected"
         cost = d.get("total_cost")
         if cost is not None:
             return label + f"✓  ${cost:.2f} this month"
         tokens = d.get("total_tokens")
         if tokens is not None:
-            return label + f"✓  {tokens:,} tokens this month"
-        note = d.get("note")
-        if note:
-            return label + f"✓  {note}"
-        return label + "✓  subscribed"
+            return label + f"✓  {tokens:,} tokens"
+        return label + "✓"
 
 
 
