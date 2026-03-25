@@ -44,7 +44,7 @@ def get_cursor_usage() -> dict:
                 parsed = _parse_usage(data)
                 return {"connected": True, **parsed}
             if resp.status_code == 401:
-                return {"connected": False, "error": "token expired — reopen Cursor"}
+                return {"connected": False, "error": "token expired — reopen Cursor IDE app"}
         except requests.exceptions.Timeout:
             continue
         except requests.exceptions.ConnectionError:
@@ -140,16 +140,31 @@ def _read_sqlite(db_path: Path) -> tuple[str | None, str | None]:
 
             lkey = key.lower()
 
+            # Exact keys Cursor uses (checked against observed DB contents):
+            #   "cursorAuth/accessToken"
+            #   "cursorAuth/cachedEmail"
+            #   "cursorAuth/stripeMembershipType"
+            if key == "cursorAuth/accessToken":
+                if isinstance(val, str) and len(val) > 20:
+                    token = val
+                continue
+
+            if key == "cursorAuth/cachedEmail":
+                if isinstance(val, str) and "@" in val:
+                    email = val
+                continue
+
+            # Broader fuzzy fallback for future key name changes
             if "cursorauth" in lkey or "cursor/auth" in lkey:
                 if isinstance(val, dict):
-                    token = (
+                    token = token or (
                         val.get("accessToken")
                         or val.get("access_token")
                         or val.get("token")
                     )
                     email = email or val.get("email") or val.get("cachedEmail")
                 elif isinstance(val, str) and len(val) > 20:
-                    token = val
+                    token = token or val
 
             if not token and "accesstoken" in lkey and isinstance(val, str) and len(val) > 20:
                 token = val
