@@ -92,8 +92,12 @@ class UsageApp(rumps.App):
         if not d.get("connected"):
             err = d.get("error", "not connected")
             return label + f"✗  {err}"
-        plan = d.get("plan", "Pro")
-        return label + f"✓  {plan} connected"
+        note = d.get("note")
+        if d.get("verified"):
+            return label + "✓  API key active"
+        if note:
+            return label + f"✓  {note}"
+        return label + "✓  subscribed"
 
     @staticmethod
     def _fmt_cursor(d):
@@ -107,9 +111,18 @@ class UsageApp(rumps.App):
             pct = used / limit * 100
             bar = _progress_bar(pct)
             return label + f"{bar}  {used}/{limit} ({pct:.0f}%)"
+        credits_used = d.get("credits_used")
+        credits_limit = d.get("credits_limit")
+        if credits_used is not None and credits_limit:
+            pct = credits_used / credits_limit * 100
+            bar = _progress_bar(pct)
+            return label + f"{bar}  ${credits_used:.2f}/${credits_limit:.2f}"
         if used is not None:
             return label + f"✓  {used} requests used"
-        return label + "✓  connected"
+        note = d.get("note")
+        if note:
+            return label + f"✓  {note}"
+        return label + "✓  subscribed"
 
     @staticmethod
     def _fmt_codex(d):
@@ -123,7 +136,10 @@ class UsageApp(rumps.App):
         tokens = d.get("total_tokens")
         if tokens is not None:
             return label + f"✓  {tokens:,} tokens this month"
-        return label + "✓  connected"
+        note = d.get("note")
+        if note:
+            return label + f"✓  {note}"
+        return label + "✓  subscribed"
 
     # ------------------------------------------------------------------
     # Open dashboards in browser
