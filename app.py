@@ -2,7 +2,6 @@
 Usage View — Mac menu bar app
 Shows Claude Pro, Cursor Pro, and Codex (OpenAI) plan usage at a glance.
 """
-import subprocess
 import threading
 from datetime import datetime
 
@@ -11,17 +10,19 @@ import rumps
 from providers.claude import get_claude_status
 from providers.codex import get_codex_usage
 from providers.cursor import get_cursor_usage
+from webview import show_dashboard
 
 
 class UsageApp(rumps.App):
     def __init__(self):
         super().__init__("📊", quit_button="Quit")
 
-        self.claude_item = rumps.MenuItem("Claude Pro   loading…", callback=self.open_claude)
-        self.cursor_item = rumps.MenuItem("Cursor Pro   loading…", callback=self.open_cursor)
-        self.codex_item  = rumps.MenuItem("Codex        loading…", callback=self.open_codex)
+        self.claude_item = rumps.MenuItem("Claude Pro   loading…", callback=lambda _: show_dashboard(0))
+        self.cursor_item = rumps.MenuItem("Cursor Pro   loading…", callback=lambda _: show_dashboard(1))
+        self.codex_item  = rumps.MenuItem("Codex        loading…", callback=lambda _: show_dashboard(2))
         self.updated_item = rumps.MenuItem("Updated: —", callback=None)
         self.refresh_item = rumps.MenuItem("↻  Refresh", callback=self.refresh)
+        self.dashboards_item = rumps.MenuItem("↗  Usage Dashboards", callback=lambda _: show_dashboard(0))
 
         self.menu = [
             self.claude_item,
@@ -30,6 +31,7 @@ class UsageApp(rumps.App):
             None,
             self.updated_item,
             self.refresh_item,
+            self.dashboards_item,
         ]
 
         # Initial fetch
@@ -141,18 +143,6 @@ class UsageApp(rumps.App):
             return label + f"✓  {note}"
         return label + "✓  subscribed"
 
-    # ------------------------------------------------------------------
-    # Open dashboards in browser
-    # ------------------------------------------------------------------
-
-    def open_claude(self, _):
-        subprocess.run(["open", "https://claude.ai/settings"], check=False)
-
-    def open_cursor(self, _):
-        subprocess.run(["open", "https://www.cursor.com/settings"], check=False)
-
-    def open_codex(self, _):
-        subprocess.run(["open", "https://platform.openai.com/usage"], check=False)
 
 
 # ------------------------------------------------------------------
